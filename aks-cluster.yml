@@ -1,0 +1,50 @@
+
+---
+- name: About to create Azure resource group
+  hosts: localhost
+  connection: local
+  vars_prompt:
+    - name: state
+      prompt: "What is the state of the resource group? e.g present/absent"
+      private: no
+  vars:
+    resource_group: aks
+    ssh_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4sTHM15pND2wFI3hoBZa8GFic3fNf+/3DyPhgB3VAi4q7lVjRyPG4v0i4rtwcvnzTXVjLFnyVPtpJPwjECT+tmjMaUalK4TD6iHltffK3nG0Bqhu9ieAxDjPQqKTyEJSchaym5VAnidBkn5iiNwKDUeydS0esr
+1wT1JM/x7dCE7W+S1g18ocf0HI8STqGqfFSRG/9qkI3umqUwwnADE8C1+BCDCI+2WI9742fMvBT6WByJ1q3AnIz+EReFW1K7knQCuqvXv5tmR9BTayf3RuksnVZJeH5MtBpnaW3TyYl41P4E7hBd/+7KfewoynLwdir/wL8KESH0sMdeLid24+d kelvin@cc-7272a66f-8665fbf
+c9d-2j2b5
+    client_id: eeb381d0-eec5-4b99-8003-7d6b9286ff83
+    client_secret: /@DcKHqTZbuMF?Rc18p-ubQ4mppNdmQ7
+    state: "{{ state }}"
+  tasks:
+
+  - name: Creating a resource group
+    azure_rm_resourcegroup:
+      name: "{{ resource_group }}-resource-group"
+      location: eastus
+      state: "{{ state }}"
+      force_delete_nonempty: yes
+    tags:
+      - addrg
+    register: rg
+  - debug:
+      var: rg
+
+  - name: Creating a managed Azure Container Services (AKS) instance
+    azure_rm_aks:
+      name: "{{ resource_group }}-cluster"
+      location: eastus
+      resource_group: aks-resource-group
+      dns_prefix: akstest
+      kubernetes_version: 1.14.8
+      linux_profile:
+        admin_username: najitestech
+        ssh_key: "{{ ssh_key }}"
+      service_principal:
+        client_id: "{{ client_id }}"
+        client_secret: "{{ client_secret }}"
+      agent_pool_profiles:
+        - name: default
+          count: 2
+          vm_size: Standard_D2_v2
+#    tags:
+#      Environment: Dev
