@@ -1,0 +1,49 @@
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "huginn"
+  namespace: "default"
+  labels:
+    app: "huginn"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "huginn"
+  template:
+    metadata:
+      labels:
+        app: "huginn"
+    spec:
+      containers:
+      - name: "huginn"
+        image: "huginn/huginn"
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: volume-new
+          mountPath: /var/huginn_new
+      volumes:
+      - name: volume-new
+        persistentVolumeClaim:
+          claimName: data-disk-02
+
+
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "huginn-service"
+  namespace: "default"
+  labels:
+    app: "huginn"
+spec:
+  ports:
+  - protocol: "TCP"
+    port: 3000
+    targetPort: 3000
+  selector:
+    app: "huginn"
+  type: "LoadBalancer"
+  loadBalancerIP: 
