@@ -5,3 +5,5 @@ kubectl config view --raw
 az aks browse --resource-group Dev-RG --name Dev-AKS-Cluster
 
 az aks get-credentials --resource-group Dev-RG --name Dev-AKS-Cluster
+
+az account set --subscription "My Demos"
